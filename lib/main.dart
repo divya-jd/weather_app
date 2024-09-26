@@ -1,107 +1,86 @@
-import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:flutter/material.dart';
 
 void main() {
-  runApp(WeatherInfoApp());
+  runApp(SimpleWeatherApp());
 }
 
-class WeatherInfoApp extends StatelessWidget {
+class SimpleWeatherApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Weather Info App',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: WeatherHomePage(),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Simple Weather Info App'),
+        ),
+        body: WeatherUI(),
+      ),
     );
   }
 }
 
-class WeatherHomePage extends StatefulWidget {
+class WeatherUI extends StatefulWidget {
   @override
-  _WeatherHomePageState createState() => _WeatherHomePageState();
+  _WeatherUIState createState() => _WeatherUIState();
 }
 
-class _WeatherHomePageState extends State<WeatherHomePage> {
+class _WeatherUIState extends State<WeatherUI> {
   final TextEditingController _cityController = TextEditingController();
-  String _city = '';
-  String _temperature = '';
-  String _weatherCondition = '';
+  String city = '--';
+  String temperature = '--';
+  String condition = '--';
+  List<String> forecast = [];
 
-  void _fetchWeather() {
+  void fetchWeather() {
     setState(() {
-      _city = _cityController.text;
-      _temperature = '${Random().nextInt(16) + 15}°C'; // Random temp between 15°C and 30°C
-      _weatherCondition = ['Sunny', 'Cloudy', 'Rainy'][Random().nextInt(3)];
+      city = _cityController.text;
+      temperature = '${Random().nextInt(16) + 15}°C';
+      condition = ['Sunny', 'Cloudy', 'Rainy'][Random().nextInt(3)];
+    });
+  }
+
+  void fetch7DayForecast() {
+    setState(() {
+      forecast = List.generate(7, (index) {
+        final temp = Random().nextInt(16) + 15;
+        final cond = ['Sunny', 'Cloudy', 'Rainy'][Random().nextInt(3)];
+        return 'Day ${index + 1}: $temp°C, $cond';
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Weather Info'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _cityController,
-              decoration: InputDecoration(
-                labelText: 'Enter City Name',
-                border: OutlineInputBorder(),
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.search),
-                  onPressed: _fetchWeather,
-                ),
-              ),
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          TextField(
+            controller: _cityController,
+            decoration: InputDecoration(labelText: 'Enter City Name'),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: fetchWeather,
+            child: Text('Fetch Weather'),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: fetch7DayForecast,
+            child: Text('Fetch 7-Day Forecast'),
+          ),
+          SizedBox(height: 20),
+          Text('City: $city'),
+          Text('Temperature: $temperature'),
+          Text('Condition: $condition'),
+          SizedBox(height: 20),
+          if (forecast.isNotEmpty)
+            Column(
+              children: forecast.map((f) => Text(f)).toList(),
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _fetchWeather,
-              child: Text('Fetch Weather'),
-            ),
-            SizedBox(height: 20),
-            _buildWeatherInfo(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWeatherInfo() {
-    if (_city.isEmpty) {
-      return Text(
-        'Please enter a city to see the weather.',
-        style: TextStyle(fontSize: 16),
-      );
-    }
-
-    return Card(
-      elevation: 5,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text(
-              _city,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Temperature: $_temperature',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Condition: $_weatherCondition',
-              style: TextStyle(fontSize: 18),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
 }
-// commit for step4, step5
